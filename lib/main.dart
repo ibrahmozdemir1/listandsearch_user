@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:listandsearch_user/Serialize/user.dart';
+import 'package:listandsearch_user/Serialize/userphoto.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,9 +67,12 @@ class JobsState extends State<Jobs> {
 
   List<Users> ulist = [];
   List<Users> userLists = [];
-  //API call for All Subject List
+  List<String> photoResponse = [];
+  List<UsersPhoto> uphotoList = [];
+  List<UsersPhoto> uphotoLists = [];
 
   String url = 'https://jsonplaceholder.typicode.com/users';
+  String photourl = 'https://picsum.photos/id/';
 
   Future<List<Users>> getAllulistList() async {
     try {
@@ -89,6 +94,34 @@ class JobsState extends State<Jobs> {
     return parsed.map<Users>((json) => Users.fromJson(json)).toList();
   }
 
+  Future<List<UsersPhoto>> getAlluphotoList() async {
+    print(userLists.length);
+    for (var i = 0; i < userLists.length; i++) {
+      String purl = photourl + (userLists[i].id).toString() + '/info';
+      try {
+        final responsephoto = await http.get(Uri.parse(purl));
+        if (responsephoto.statusCode == 200) {
+          photoResponse.add(responsephoto.body);
+        } else {
+          throw Exception('Error');
+        }
+      } catch (e1) {
+        throw Exception(e1.toString());
+      }
+    }
+    List<UsersPhoto> photolist = parseAgentsPhoto(photoResponse);
+    return photolist;
+  }
+
+  static List<UsersPhoto> parseAgentsPhoto(List<String> uphotos) {
+    List<UsersPhoto> uphotoList = [];
+    for (var i = 0; i < uphotos.length; i++) {
+      final parsed = UsersPhoto.fromJson(json.decode(uphotos[i]));
+      uphotoList.add(parsed);
+    }
+    return uphotoList;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +129,12 @@ class JobsState extends State<Jobs> {
       setState(() {
         ulist = usersFromServer;
         userLists = ulist;
+      });
+      getAlluphotoList().then((uphotoServer) {
+        setState(() {
+          uphotoList = uphotoServer;
+          uphotoLists = uphotoList;
+        });
       });
     });
   }
@@ -191,137 +230,5 @@ class JobsState extends State<Jobs> {
         ],
       ),
     );
-  }
-}
-
-//Declare Subject class for json data or parameters of json string/data
-//Class For Subject
-class Users {
-  int? id;
-  String? name;
-  String? username;
-  String? email;
-  Address? address;
-  String? phone;
-  String? website;
-  Company? company;
-
-  Users(
-      {this.id,
-      this.name,
-      this.username,
-      this.email,
-      this.address,
-      this.phone,
-      this.website,
-      this.company});
-
-  Users.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    username = json['username'];
-    email = json['email'];
-
-    address =
-        json['address'] != null ? Address.fromJson(json['address']) : null;
-
-    phone = json['phone'];
-
-    website = json['website'];
-
-    company =
-        json['company'] != null ? Company.fromJson(json['company']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['name'] = name;
-    data['username'] = username;
-    data['email'] = email;
-    if (address != null) {
-      data['address'] = address!.toJson();
-    }
-    data['phone'] = phone;
-    data['website'] = website;
-    if (company != null) {
-      data['company'] = company!.toJson();
-    }
-    return data;
-  }
-}
-
-class Address {
-  String? street;
-  String? suite;
-  String? city;
-  String? zipcode;
-  Geo? geo;
-
-  Address({this.street, this.suite, this.city, this.zipcode, this.geo});
-
-  Address.fromJson(Map<String, dynamic> json) {
-    street = json['street'];
-    suite = json['suite'];
-    city = json['city'];
-    zipcode = json['zipcode'];
-    if (json['geo'] != null) {
-      geo = Geo.fromJson(json['geo']);
-    } else {
-      geo = null;
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['street'] = street;
-    data['suite'] = suite;
-    data['city'] = city;
-    data['zipcode'] = zipcode;
-    if (geo != null) {
-      data['geo'] = geo!.toJson();
-    }
-    return data;
-  }
-}
-
-class Geo {
-  String? lat;
-  String? lng;
-
-  Geo({this.lat, this.lng});
-
-  Geo.fromJson(Map<String, dynamic> json) {
-    lat = json['lat'];
-    lng = json['lng'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['lat'] = lat;
-    data['lng'] = lng;
-    return data;
-  }
-}
-
-class Company {
-  String? name;
-  String? catchPhrase;
-  String? bs;
-
-  Company({this.name, this.catchPhrase, this.bs});
-
-  Company.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    catchPhrase = json['catchPhrase'];
-    bs = json['bs'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['name'] = name;
-    data['catchPhrase'] = catchPhrase;
-    data['bs'] = bs;
-    return data;
   }
 }
