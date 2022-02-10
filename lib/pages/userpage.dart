@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:listandsearch_user/Serialize/user.dart';
@@ -47,7 +46,7 @@ class JobsState extends State<Jobs> {
         throw Exception('Error');
       }
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(e);
     }
   }
 
@@ -66,8 +65,8 @@ class JobsState extends State<Jobs> {
         } else {
           throw Exception('Error');
         }
-      } catch (e1) {
-        throw Exception(e1.toString());
+      } catch (e) {
+        throw Exception(e);
       }
     }
     List<UsersPhoto> photolist = parseAgentsPhoto(photoResponse);
