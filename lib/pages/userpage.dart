@@ -21,10 +21,10 @@ List<UsersPhoto> uphotoLists = [];
 List<Users> ulist = [];
 List<Users> userLists = [];
 
-purlGetir(String userid) {
+getPhotoUrl(String userid) {
   for (var i = 0; i < uphotoLists.length; i++) {
-    if (uphotoLists[i].id == userid) {
-      String photoUrl = (uphotoLists[i].download_url).toString();
+    if (uphotoList[i].id == userid) {
+      String photoUrl = (uphotoList[i].download_url).toString();
       return photoUrl;
     }
   }
@@ -116,7 +116,7 @@ class JobsState extends State<Jobs> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'All Users',
+          'Personal Information',
           style: TextStyle(fontSize: 25),
         ),
       ),
@@ -178,16 +178,20 @@ class JobsState extends State<Jobs> {
                           ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              radius: 30,
-                              backgroundImage: NetworkImage(
-                                  purlGetir(userLists[index].id.toString())),
-                            ),
+                                radius: 30,
+                                backgroundImage: (getPhotoUrl(
+                                            userLists[index].id.toString()) ==
+                                        null)
+                                    ? const AssetImage('image/loading.gif')
+                                    : NetworkImage(getPhotoUrl(
+                                            userLists[index].id.toString()))
+                                        as ImageProvider),
                             title: Text(
-                              userLists[index].name ?? "null",
+                              (userLists[index].name).toString(),
                               style: const TextStyle(fontSize: 16),
                             ),
                             subtitle: Text(
-                              userLists[index].username ?? "null",
+                              (userLists[index].username).toString(),
                               style: const TextStyle(fontSize: 16),
                             ),
                             trailing: IconButton(
@@ -217,7 +221,7 @@ class JobsState extends State<Jobs> {
 
 ShapeBorder _defaultShape() {
   return RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(10.0),
+    borderRadius: BorderRadius.circular(30.0),
     side: const BorderSide(
       color: Colors.deepOrange,
     ),
@@ -226,7 +230,7 @@ ShapeBorder _defaultShape() {
 
 _getCloseButton(context) {
   return Padding(
-    padding: const EdgeInsets.fromLTRB(0, 10, 10, 0),
+    padding: const EdgeInsets.fromLTRB(10, 10, 5, 10),
     child: GestureDetector(
       onTap: () {},
       child: Container(
@@ -249,44 +253,70 @@ Widget _informationDialog(context, userid, index) {
   return AlertDialog(
     backgroundColor: Colors.white,
     shape: _defaultShape(),
-    insetPadding: const EdgeInsets.all(8),
-    elevation: 10,
-    titlePadding: const EdgeInsets.all(0.0),
-    title: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        _getCloseButton(context),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-              child: CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(purlGetir(userid)),
+    content: SizedBox(
+      width: 250,
+      height: 330,
+      child: Column(
+        children: <Widget>[
+          _getCloseButton(context),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: (getPhotoUrl(userid) == null)
+                    ? const AssetImage('image/loading.gif')
+                    : NetworkImage(getPhotoUrl(userid)) as ImageProvider,
               ),
-            )
-          ],
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ListTile(
-              title: Text(
-                userLists[index].name ?? "null",
+              Text(
+                (userLists[index].name).toString(),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                (userLists[index].email).toString(),
                 style: const TextStyle(fontSize: 16),
               ),
-              subtitle: Text(
-                userLists[index].email ?? "null",
-                style: const TextStyle(fontSize: 16),
-              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Email: " + (userLists[index].email).toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  "Telefon: " + (userLists[index].phone).toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  "Adres: " +
+                      (userLists[index].address!.street).toString() +
+                      (userLists[index].address!.suite).toString() +
+                      (userLists[index].address!.zipcode).toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  "Şehir: " + (userLists[index].address!.city).toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  "Konum: " +
+                      (userLists[index].address!.geo!.lat).toString() +
+                      "/" +
+                      (userLists[index].address!.geo!.lng).toString(),
+                  style: const TextStyle(fontSize: 16),
+                )
+              ],
             ),
-          ],
-        ),
-      ],
+          )
+        ],
+      ),
     ),
   );
 }
